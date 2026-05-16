@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Settings - HaaS Platform{% endblock %}
+{% block body %}
+<div class="flex min-h-screen">
+    <nav class="w-64 bg-cyber-card border-r border-cyber-border fixed h-full z-50 flex flex-col">
+        <div class="p-5 border-b border-cyber-border flex items-center gap-3"><i class="fas fa-shield-halved text-cyber-blue text-xl"></i><span class="font-bold text-lg">HaaS <span class="text-cyber-blue">AI</span></span></div>
+        <ul class="flex-1 p-3 space-y-1">
+            <li><a href="{{ url_for('dashboard.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition"><i class="fas fa-tachometer-alt w-5"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('dashboard.attacks') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition"><i class="fas fa-crosshairs w-5"></i> Attack Logs</a></li>
+            <li><a href="{{ url_for('dashboard.services') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition"><i class="fas fa-server w-5"></i> Services</a></li>
+            <li><a href="{{ url_for('dashboard.analytics') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition"><i class="fas fa-chart-bar w-5"></i> Analytics</a></li>
+            <li><a href="{{ url_for('dashboard.attack_map') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition"><i class="fas fa-globe w-5"></i> Attack Map</a></li>
+            <li><a href="{{ url_for('dashboard.settings') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-cyber-blue/10 text-cyber-blue border border-cyber-blue/20"><i class="fas fa-cog w-5"></i> Settings</a></li>
+        </ul>
+        <div class="p-3 border-t border-cyber-border"><a href="{{ url_for('auth.logout') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition"><i class="fas fa-sign-out-alt w-5"></i> Logout</a></div>
+    </nav>
+    <main class="flex-1 ml-64 p-6">
+        <header class="mb-6"><h1 class="text-xl font-bold"><i class="fas fa-cog text-cyber-blue"></i> Platform Settings</h1></header>
+
+        <div id="settings-status" class="hidden mb-4 p-3 rounded-lg text-sm"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Telegram Alerts -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-5">
+                <h3 class="text-sm font-semibold text-gray-300 mb-4 flex items-center gap-2"><i class="fab fa-telegram text-blue-400"></i> Telegram Alerts</h3>
+                <div class="space-y-3">
+                    <div><label class="text-xs text-gray-500 block mb-1">Bot Token</label><input type="text" id="telegram_bot_token" class="w-full bg-black/30 border border-cyber-border rounded-lg px-3 py-2 text-sm text-gray-300" placeholder="Enter Telegram Bot Token"></div>
+                    <div><label class="text-xs text-gray-500 block mb-1">Chat ID</label><input type="text" id="telegram_chat_id" class="w-full bg-black/30 border border-cyber-border rounded-lg px-3 py-2 text-sm text-gray-300" placeholder="Enter Chat ID"></div>
+                    <button onclick="testTelegram()" class="px-4 py-2 rounded-lg text-xs bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition"><i class="fas fa-paper-plane"></i> Test Notification</button>
+                </div>
+            </div>
+
+            <!-- AI Settings -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-5">
+                <h3 class="text-sm font-semibold text-gray-300 mb-4 flex items-center gap-2"><i class="fas fa-brain text-purple-400"></i> AI Configuration</h3>
+                <div class="space-y-3">
+                    <div><label class="text-xs text-gray-500 block mb-1">Anomaly Sensitivity (1-5)</label><input type="number" id="ai_sensitivity" min="1" max="5" step="0.5" value="2.0" class="w-full bg-black/30 border border-cyber-border rounded-lg px-3 py-2 text-sm text-gray-300"></div>
+                    <div><label class="text-xs text-gray-500 block mb-1">Min Classification Confidence (0-1)</label><input type="number" id="ai_min_confidence" min="0" max="1" step="0.1" value="0.3" class="w-full bg-black/30 border border-cyber-border rounded-lg px-3 py-2 text-sm text-gray-300"></div>
+                    <div class="flex items-center gap-2"><input type="checkbox" id="ai_enabled" checked class="rounded"><label class="text-xs text-gray-400">Enable AI Analysis</label></div>
+                </div>
+            </div>
+
+            <!-- Alert Thresholds -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-5">
+                <h3 class="text-sm font-semibold text-gray-300 mb-4 flex items-center gap-2"><i class="fas fa-bell text-yellow-400"></i> Alert Thresholds</h3>
+                <div class="space-y-3">
+                    <div><label class="text-xs text-gray-500 block mb-1">Min Threat Score for Alert (0-10)</label><input type="number" id="alert_min_score" min="0" max="10" step="0.5" value="7.0" class="w-full bg-black/30 border border-cyber-border rounded-lg px-3 py-2 text-sm text-gray-300"></div>
+                    <div><label class="text-xs text-gray-500 block mb-1">Alert Cooldown (minutes)</label><input type="number" id="alert_cooldown" min="1" max="60" value="5" class="w-full bg-black/30 border border-cyber-border rounded-lg px-3 py-2 text-sm text-gray-300"></div>
+                    <div class="flex items-center gap-2"><input type="checkbox" id="alerting_enabled" checked class="rounded"><label class="text-xs text-gray-400">Enable Alerting</label></div>
+                </div>
+            </div>
+
+            <!-- Threat Intel -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-5">
+                <h3 class="text-sm font-semibold text-gray-300 mb-4 flex items-center gap-2"><i class="fas fa-shield-alt text-green-400"></i> Threat Intelligence</h3>
+                <div class="space-y-3">
+                    <div><label class="text-xs text-gray-500 block mb-1">AbuseIPDB API Key</label><input type="password" id="abuseipdb_key" class="w-full bg-black/30 border border-cyber-border rounded-lg px-3 py-2 text-sm text-gray-300" placeholder="API Key"></div>
+                    <div><label class="text-xs text-gray-500 block mb-1">VirusTotal API Key</label><input type="password" id="virustotal_key" class="w-full bg-black/30 border border-cyber-border rounded-lg px-3 py-2 text-sm text-gray-300" placeholder="API Key"></div>
+                    <div class="flex items-center gap-2"><input type="checkbox" id="threat_intel_enabled" checked class="rounded"><label class="text-xs text-gray-400">Enable Threat Intelligence</label></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 flex gap-3">
+            <button onclick="saveSettings()" class="px-6 py-3 rounded-lg bg-cyber-blue/20 text-cyber-blue border border-cyber-blue/30 hover:bg-cyber-blue/30 transition font-semibold"><i class="fas fa-save"></i> Save All Settings</button>
+        </div>
+    </main>
+</div>
+<script>
+async function saveSettings() {
+    const data = {
+        telegram_bot_token: document.getElementById('telegram_bot_token').value,
+        telegram_chat_id: document.getElementById('telegram_chat_id').value,
+        ai_sensitivity: document.getElementById('ai_sensitivity').value,
+        ai_min_confidence: document.getElementById('ai_min_confidence').value,
+        ai_enabled: document.getElementById('ai_enabled').checked ? 'true' : 'false',
+        alert_min_score: document.getElementById('alert_min_score').value,
+        alert_cooldown: document.getElementById('alert_cooldown').value,
+        alerting_enabled: document.getElementById('alerting_enabled').checked ? 'true' : 'false',
+        threat_intel_enabled: document.getElementById('threat_intel_enabled').checked ? 'true' : 'false'
+    };
+    try {
+        const resp = await fetch('/settings/save', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+        const result = await resp.json();
+        showStatus(result.status === 'success' ? 'Settings saved!' : result.error, result.status === 'success');
+    } catch(e) { showStatus('Error saving settings', false); }
+}
+
+async function testTelegram() {
+    try {
+        const resp = await fetch('/settings/test-telegram', {method:'POST'});
+        const result = await resp.json();
+        showStatus(result.status === 'success' ? 'Test sent!' : result.error, result.status === 'success');
+    } catch(e) { showStatus('Error sending test', false); }
+}
+
+function showStatus(msg, success) {
+    const el = document.getElementById('settings-status');
+    el.className = `mb-4 p-3 rounded-lg text-sm ${success ? 'bg-green-500/10 border border-green-500/30 text-green-400' : 'bg-red-500/10 border border-red-500/30 text-red-400'}`;
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 4000);
+}
+
+// Load existing settings on page load
+(async () => {
+    try {
+        const resp = await fetch('/settings/get');
+        const data = await resp.json();
+        if (data.settings) {
+            const s = data.settings;
+            if (s.telegram_bot_token) document.getElementById('telegram_bot_token').value = s.telegram_bot_token;
+            if (s.telegram_chat_id) document.getElementById('telegram_chat_id').value = s.telegram_chat_id;
+            if (s.ai_sensitivity) document.getElementById('ai_sensitivity').value = s.ai_sensitivity;
+            if (s.ai_min_confidence) document.getElementById('ai_min_confidence').value = s.ai_min_confidence;
+            if (s.ai_enabled) document.getElementById('ai_enabled').checked = s.ai_enabled === 'true';
+            if (s.alert_min_score) document.getElementById('alert_min_score').value = s.alert_min_score;
+            if (s.alert_cooldown) document.getElementById('alert_cooldown').value = s.alert_cooldown;
+            if (s.alerting_enabled) document.getElementById('alerting_enabled').checked = s.alerting_enabled === 'true';
+            if (s.threat_intel_enabled) document.getElementById('threat_intel_enabled').checked = s.threat_intel_enabled === 'true';
+        }
+    } catch(e) {}
+})();
+</script>
+{% endblock %}

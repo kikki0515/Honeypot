@@ -1,7 +1,7 @@
 """Database models for the Honeypot-as-a-Service platform.
 
 Extended with AI analysis fields, GeoIP data, threat intelligence,
-distributed agent support, and campaign tracking.
+distributed agent support, campaign tracking, and settings storage.
 """
 
 from datetime import datetime
@@ -26,15 +26,31 @@ class User(UserMixin, db.Model):
     last_login = db.Column(db.DateTime)
 
     def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+        """Hash and store password."""
+        self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
 
     def check_password(self, password):
+        """Verify password against stored hash."""
+        if not self.password_hash:
+            return False
         return check_password_hash(self.password_hash, password)
+
+    @property
+    def is_admin(self):
+        """Check if user has admin role."""
+        return self.role == 'admin'
+
+    def __repr__(self):
+        return f'<User {self.username}>'
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    """Flask-Login user loader callback."""
+    try:
+        return db.session.get(User, int(user_id))
+    except (ValueError, TypeError):
+        return None
 
 
 class AttackLog(db.Model):
@@ -45,22 +61,22 @@ class AttackLog(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     source_ip = db.Column(db.String(45), nullable=False, index=True)
     source_port = db.Column(db.Integer)
-    honeypot_type = db.Column(db.String(20), nullable=False)  # ssh, http, ftp
+    honeypot_type = db.Column(db.String(20), nullable=False)
     protocol = db.Column(db.String(10))
-    action = db.Column(db.String(100))  # e.g., "login_attempt", "file_access"
-    details = db.Column(db.Text)  # JSON string with additional details
+    action = db.Column(db.String(100))
+    details = db.Column(db.Text)
     username_attempted = db.Column(db.String(100))
     password_attempted = db.Column(db.String(100))
-    severity = db.Column(db.String(10), default='medium')  # low, medium, high, critical
+    severity = db.Column(db.String(10), default='medium')
 
-    # --- AI Analysis Fields ---
-    ai_classification = db.Column(db.String(50))  # brute_force, sql_injection, etc.
-    ai_confidence = db.Column(db.Float)  # 0.0 - 1.0
-    ai_summary = db.Column(db.Text)  # Human-readable AI summary
-    threat_score = db.Column(db.Float)  # 0.0 - 10.0
-    threat_risk_level = db.Column(db.String(10))  # low, medium, high, critical
+    # AI Analysis Fields
+    ai_classification = db.Column(db.String(50))
+    ai_confidence = db.Column(db.Float)
+    ai_summary = db.Column(db.Text)
+    threat_score = db.Column(db.Float)
+    threat_risk_level = db.Column(db.String(10))
 
-    # --- GeoIP Fields ---
+    # GeoIP Fields
     geoip_country = db.Column(db.String(100))
     geoip_country_code = db.Column(db.String(5))
     geoip_city = db.Column(db.String(100))
@@ -69,21 +85,21 @@ class AttackLog(db.Model):
     geoip_asn = db.Column(db.String(20))
     geoip_isp = db.Column(db.String(200))
 
-    # --- Threat Intelligence Fields ---
-    reputation_score = db.Column(db.Float)  # 0-100 from external sources
-    reputation_source = db.Column(db.String(50))  # abuseipdb, virustotal
+    # Threat Intelligence Fields
+    reputation_score = db.Column(db.Float)
+    reputation_source = db.Column(db.String(50))
     is_known_malicious = db.Column(db.Boolean, default=False)
 
-    # --- Attacker Profiling ---
-    attacker_fingerprint = db.Column(db.String(32))  # Behavioral fingerprint hash
-    campaign_id = db.Column(db.String(20), index=True)  # Campaign grouping
+    # Attacker Profiling
+    attacker_fingerprint = db.Column(db.String(32))
+    campaign_id = db.Column(db.String(20), index=True)
 
-    # --- Anomaly Detection ---
+    # Anomaly Detection
     is_anomaly = db.Column(db.Boolean, default=False)
     anomaly_score = db.Column(db.Float)
 
-    # --- Distributed Agent ---
-    agent_id = db.Column(db.String(64), index=True)  # Which agent reported this
+    # Distributed Agent
+    agent_id = db.Column(db.String(64), index=True)
     node_name = db.Column(db.String(100))
 
     def to_dict(self):
@@ -99,13 +115,11 @@ class AttackLog(db.Model):
             'username_attempted': self.username_attempted,
             'password_attempted': self.password_attempted,
             'severity': self.severity,
-            # AI fields
             'ai_classification': self.ai_classification,
             'ai_confidence': self.ai_confidence,
             'ai_summary': self.ai_summary,
             'threat_score': self.threat_score,
             'threat_risk_level': self.threat_risk_level,
-            # GeoIP
             'geoip_country': self.geoip_country,
             'geoip_country_code': self.geoip_country_code,
             'geoip_city': self.geoip_city,
@@ -113,15 +127,12 @@ class AttackLog(db.Model):
             'geoip_longitude': self.geoip_longitude,
             'geoip_asn': self.geoip_asn,
             'geoip_isp': self.geoip_isp,
-            # Threat Intel
             'reputation_score': self.reputation_score,
             'is_known_malicious': self.is_known_malicious,
-            # Profiling
             'attacker_fingerprint': self.attacker_fingerprint,
             'campaign_id': self.campaign_id,
             'is_anomaly': self.is_anomaly,
             'anomaly_score': self.anomaly_score,
-            # Agent
             'agent_id': self.agent_id,
             'node_name': self.node_name
         }
@@ -134,7 +145,7 @@ class HoneypotService(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     service_type = db.Column(db.String(20), unique=True, nullable=False)
     port = db.Column(db.Integer, nullable=False)
-    status = db.Column(db.String(20), default='stopped')  # running, stopped, error
+    status = db.Column(db.String(20), default='stopped')
     started_at = db.Column(db.DateTime)
     total_connections = db.Column(db.Integer, default=0)
     last_activity = db.Column(db.DateTime)
@@ -157,17 +168,17 @@ class ThreatIntelFeed(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     ip_address = db.Column(db.String(45), unique=True, nullable=False, index=True)
-    abuse_confidence = db.Column(db.Integer)  # AbuseIPDB confidence 0-100
+    abuse_confidence = db.Column(db.Integer)
     total_reports = db.Column(db.Integer, default=0)
     is_tor_exit = db.Column(db.Boolean, default=False)
     is_vpn = db.Column(db.Boolean, default=False)
     is_proxy = db.Column(db.Boolean, default=False)
     is_bot = db.Column(db.Boolean, default=False)
-    threat_categories = db.Column(db.Text)  # JSON list of categories
+    threat_categories = db.Column(db.Text)
     first_seen = db.Column(db.DateTime, default=datetime.utcnow)
     last_checked = db.Column(db.DateTime, default=datetime.utcnow)
-    data_source = db.Column(db.String(50))  # abuseipdb, virustotal, etc.
-    raw_response = db.Column(db.Text)  # Full JSON response cached
+    data_source = db.Column(db.String(50))
+    raw_response = db.Column(db.Text)
 
     def to_dict(self):
         return {
@@ -186,7 +197,7 @@ class ThreatIntelFeed(db.Model):
 
 
 class Campaign(db.Model):
-    """Detected attack campaigns (coordinated attacks)."""
+    """Detected attack campaigns."""
     __tablename__ = 'campaigns'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -195,11 +206,11 @@ class Campaign(db.Model):
     description = db.Column(db.Text)
     first_seen = db.Column(db.DateTime, default=datetime.utcnow)
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
-    source_ips = db.Column(db.Text)  # JSON list of IPs
+    source_ips = db.Column(db.Text)
     protocols_targeted = db.Column(db.String(100))
     total_attacks = db.Column(db.Integer, default=0)
     severity = db.Column(db.String(10), default='medium')
-    status = db.Column(db.String(20), default='active')  # active, resolved, monitoring
+    status = db.Column(db.String(20), default='active')
 
     def to_dict(self):
         return {
@@ -227,10 +238,10 @@ class HoneypotAgent(db.Model):
     hostname = db.Column(db.String(200))
     ip_address = db.Column(db.String(45))
     location = db.Column(db.String(200))
-    status = db.Column(db.String(20), default='offline')  # online, offline, error
+    status = db.Column(db.String(20), default='offline')
     registered_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_heartbeat = db.Column(db.DateTime)
-    services_running = db.Column(db.Text)  # JSON list of active services
+    services_running = db.Column(db.Text)
     total_attacks_reported = db.Column(db.Integer, default=0)
     version = db.Column(db.String(20))
     api_key = db.Column(db.String(128))
@@ -260,9 +271,9 @@ class AlertRule(db.Model):
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     is_active = db.Column(db.Boolean, default=True)
-    trigger_type = db.Column(db.String(50))  # severity, score, campaign, anomaly, frequency
-    trigger_condition = db.Column(db.Text)  # JSON conditions
-    channels = db.Column(db.Text)  # JSON: ["telegram", "discord", "email"]
+    trigger_type = db.Column(db.String(50))
+    trigger_condition = db.Column(db.Text)
+    channels = db.Column(db.Text)
     cooldown_minutes = db.Column(db.Integer, default=5)
     last_triggered = db.Column(db.DateTime)
     times_triggered = db.Column(db.Integer, default=0)
@@ -294,7 +305,7 @@ class AlertHistory(db.Model):
     channel = db.Column(db.String(50))
     message = db.Column(db.Text)
     attack_id = db.Column(db.Integer, db.ForeignKey('attack_logs.id'))
-    status = db.Column(db.String(20), default='sent')  # sent, failed, acknowledged
+    status = db.Column(db.String(20), default='sent')
 
     def to_dict(self):
         return {
@@ -306,3 +317,32 @@ class AlertHistory(db.Model):
             'attack_id': self.attack_id,
             'status': self.status
         }
+
+
+class SystemSetting(db.Model):
+    """Key-value settings storage for dashboard configuration."""
+    __tablename__ = 'system_settings'
+
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    value = db.Column(db.Text)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    @classmethod
+    def get(cls, key, default=None):
+        """Get a setting value by key."""
+        setting = cls.query.filter_by(key=key).first()
+        return setting.value if setting else default
+
+    @classmethod
+    def set(cls, key, value):
+        """Set a setting value."""
+        setting = cls.query.filter_by(key=key).first()
+        if setting:
+            setting.value = str(value)
+            setting.updated_at = datetime.utcnow()
+        else:
+            setting = cls(key=key, value=str(value))
+            db.session.add(setting)
+        db.session.commit()
+        return setting
