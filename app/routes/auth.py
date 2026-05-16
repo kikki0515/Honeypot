@@ -33,37 +33,10 @@ def login():
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
-    """Handle user registration."""
-    if current_user.is_authenticated:
-        return redirect(url_for('dashboard.index'))
+    """Disable public registration."""
+    flash('Registration is disabled. Contact administrator for access.', 'info')
 
-    if request.method == 'POST':
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
-
-        if password != confirm_password:
-            flash('Passwords do not match', 'error')
-            return render_template('auth/register.html')
-
-        if User.query.filter_by(username=username).first():
-            flash('Username already taken', 'error')
-            return render_template('auth/register.html')
-
-        if User.query.filter_by(email=email).first():
-            flash('Email already registered', 'error')
-            return render_template('auth/register.html')
-
-        user = User(username=username, email=email)
-        user.set_password(password)
-        db.session.add(user)
-        db.session.commit()
-
-        flash('Registration successful! Please login.', 'success')
-        return redirect(url_for('auth.login'))
-
-    return render_template('auth/register.html')
+    return redirect(url_for('auth.login'))
 
 
 @auth_bp.route('/logout')
