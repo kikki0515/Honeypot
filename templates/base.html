@@ -3,13 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Honeypot-as-a-Service{% endblock %}</title>
+    <title>{% block title %}HaaS - AI Threat Intelligence{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cyber-dark': '#0a0a14',
+                        'cyber-card': '#12121f',
+                        'cyber-border': '#1f1f35',
+                        'cyber-blue': '#00d4ff',
+                        'cyber-green': '#00ff88',
+                        'cyber-red': '#ff3366',
+                        'cyber-yellow': '#ffaa00',
+                        'cyber-purple': '#aa44ff',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
+<body class="bg-cyber-dark text-gray-200 min-h-screen">
     {% block body %}{% endblock %}
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     {% block scripts %}{% endblock %}

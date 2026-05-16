@@ -1,9 +1,40 @@
+# Core Framework
 flask==3.0.0
 flask-socketio==5.3.6
 flask-sqlalchemy==3.1.1
 flask-login==0.6.3
-paramiko==3.4.0
+werkzeug==3.0.1
+python-dotenv==1.0.0
+
+# Real-time communication
 gevent==23.9.1
 gevent-websocket==0.10.1
-python-dotenv==1.0.0
-werkzeug==3.0.1
+
+# SSH Honeypot
+paramiko==3.4.0
+
+# Async Processing
+celery[redis]==5.3.6
+redis==5.0.1
+
+# Database
+psycopg2-binary==2.9.9
+
+# AI / Machine Learning
+scikit-learn==1.3.2
+numpy==1.26.2
+pandas==2.1.4
+
+# GeoIP
+geoip2==4.8.0
+
+# Threat Intelligence API
+requests==2.31.0
+
+# Security
+flask-limiter==3.5.0
+flask-wtf==1.2.1
+flask-talisman==1.1.0
+
+# Utilities
+python-dateutil==2.8.2

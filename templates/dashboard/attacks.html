@@ -1,97 +1,49 @@
 {% extends "base.html" %}
-
-{% block title %}Attack Logs - Honeypot-as-a-Service{% endblock %}
-
+{% block title %}Attack Logs - AI Threat Intelligence{% endblock %}
 {% block body %}
-<div class="app-layout">
-    <!-- Sidebar -->
-    <nav class="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-shield-alt"></i>
-            <span>HaaS Platform</span>
+<div class="flex min-h-screen">
+    <nav class="w-64 bg-cyber-card border-r border-cyber-border fixed h-full z-50 flex flex-col">
+        <div class="p-5 border-b border-cyber-border flex items-center gap-3">
+            <i class="fas fa-shield-halved text-cyber-blue text-xl"></i>
+            <span class="font-bold text-lg">HaaS <span class="text-cyber-blue">AI</span></span>
         </div>
-        <ul class="sidebar-nav">
-            <li>
-                <a href="{{ url_for('dashboard.index') }}">
-                    <i class="fas fa-tachometer-alt"></i> Dashboard
-                </a>
-            </li>
-            <li class="active">
-                <a href="{{ url_for('dashboard.attacks') }}">
-                    <i class="fas fa-crosshairs"></i> Attack Logs
-                </a>
-            </li>
-            <li>
-                <a href="{{ url_for('dashboard.services') }}">
-                    <i class="fas fa-server"></i> Services
-                </a>
-            </li>
-            <li>
-                <a href="{{ url_for('dashboard.analytics') }}">
-                    <i class="fas fa-chart-bar"></i> Analytics
-                </a>
-            </li>
+        <ul class="flex-1 p-3 space-y-1">
+            <li><a href="{{ url_for('dashboard.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition"><i class="fas fa-tachometer-alt w-5"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('dashboard.attacks') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-cyber-blue/10 text-cyber-blue border border-cyber-blue/20"><i class="fas fa-crosshairs w-5"></i> Attack Logs</a></li>
+            <li><a href="{{ url_for('dashboard.services') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition"><i class="fas fa-server w-5"></i> Services</a></li>
+            <li><a href="{{ url_for('dashboard.analytics') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition"><i class="fas fa-chart-bar w-5"></i> Analytics</a></li>
         </ul>
-        <div class="sidebar-footer">
-            <a href="{{ url_for('auth.logout') }}">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
+        <div class="p-3 border-t border-cyber-border">
+            <a href="{{ url_for('auth.logout') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition"><i class="fas fa-sign-out-alt w-5"></i> Logout</a>
         </div>
     </nav>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <header class="top-bar">
-            <h2><i class="fas fa-crosshairs"></i> Attack Logs</h2>
-            <div class="filter-controls">
-                <select id="filter-type" class="form-select">
-                    <option value="">All Types</option>
-                    <option value="ssh">SSH</option>
-                    <option value="http">HTTP</option>
-                    <option value="ftp">FTP</option>
+    <main class="flex-1 ml-64 p-6">
+        <header class="flex justify-between items-center mb-6">
+            <h1 class="text-xl font-bold"><i class="fas fa-crosshairs text-cyber-red"></i> Attack Logs</h1>
+            <div class="flex gap-3">
+                <select id="filter-type" class="bg-cyber-card border border-cyber-border rounded-lg px-3 py-2 text-sm text-gray-300">
+                    <option value="">All Types</option><option value="ssh">SSH</option><option value="http">HTTP</option><option value="ftp">FTP</option>
                 </select>
-                <select id="filter-severity" class="form-select">
-                    <option value="">All Severity</option>
-                    <option value="critical">Critical</option>
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
+                <select id="filter-severity" class="bg-cyber-card border border-cyber-border rounded-lg px-3 py-2 text-sm text-gray-300">
+                    <option value="">All Severity</option><option value="critical">Critical</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
                 </select>
-                <button class="btn btn-sm" onclick="loadAttacks()">
-                    <i class="fas fa-refresh"></i> Refresh
-                </button>
+                <button onclick="loadAttacks()" class="bg-cyber-blue/20 text-cyber-blue border border-cyber-blue/30 px-4 py-2 rounded-lg text-sm hover:bg-cyber-blue/30 transition"><i class="fas fa-refresh"></i> Refresh</button>
             </div>
         </header>
-
-        <div class="data-card full-width">
-            <div class="table-container">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Timestamp</th>
-                            <th>Source IP</th>
-                            <th>Port</th>
-                            <th>Type</th>
-                            <th>Action</th>
-                            <th>Username</th>
-                            <th>Password</th>
-                            <th>Severity</th>
-                        </tr>
-                    </thead>
-                    <tbody id="attacks-table">
-                        <tr><td colspan="8" class="empty-state">Loading attack logs...</td></tr>
-                    </tbody>
+        <div class="bg-cyber-card border border-cyber-border rounded-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs">
+                    <thead><tr class="text-gray-500 border-b border-cyber-border bg-black/20">
+                        <th class="text-left py-3 px-3">Time</th><th class="text-left py-3">Source IP</th><th class="text-left py-3">Type</th>
+                        <th class="text-left py-3">Action</th><th class="text-left py-3">AI Class</th><th class="text-left py-3">Score</th>
+                        <th class="text-left py-3">Country</th><th class="text-left py-3">Severity</th>
+                    </tr></thead>
+                    <tbody id="attacks-table"><tr><td colspan="8" class="text-center py-12 text-gray-600">Loading...</td></tr></tbody>
                 </table>
             </div>
-
-            <!-- Pagination -->
-            <div class="pagination" id="pagination">
-            </div>
+            <div class="p-4 border-t border-cyber-border flex justify-center gap-2" id="pagination"></div>
         </div>
     </main>
 </div>
 {% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/attacks.js') }}"></script>
-{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/attacks.js') }}"></script>{% endblock %}
