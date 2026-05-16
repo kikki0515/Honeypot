@@ -1,131 +1,74 @@
 /**
- * Honeypot-as-a-Service - Main Application JavaScript
- * Handles WebSocket connection and real-time updates
+ * HaaS AI Platform - Core Application JavaScript
+ * WebSocket connection, real-time notifications, and shared utilities
  */
 
-// Initialize Socket.IO connection
 const socket = io();
 
-socket.on('connect', () => {
-    console.log('Connected to HaaS server');
-});
+socket.on('connect', () => console.log('Connected to HaaS AI Platform'));
+socket.on('disconnect', () => console.log('Disconnected'));
 
-socket.on('disconnect', () => {
-    console.log('Disconnected from HaaS server');
-});
-
-// Listen for new attack events (real-time)
+// Global notification system
 socket.on('new_attack', (data) => {
-    console.log('New attack detected:', data);
-
-    // Update dashboard if on dashboard page
-    if (typeof updateRecentAttacks === 'function') {
-        updateRecentAttacks(data);
-    }
-
-    // Show notification
-    showNotification(data);
+    if (typeof updateRecentAttacks === 'function') updateRecentAttacks(data);
 });
 
-// Listen for service status changes
+socket.on('ai_alert', (data) => {
+    showNotification(data, 'critical');
+});
+
+socket.on('alert_triggered', (data) => {
+    showNotification(data, 'alert');
+});
+
 socket.on('service_status', (data) => {
-    console.log('Service status update:', data);
-
-    if (typeof updateServiceStatus === 'function') {
-        updateServiceStatus(data);
-    }
+    if (typeof updateServiceStatus === 'function') updateServiceStatus(data);
 });
 
-/**
- * Show a brief notification for new attacks
- */
-function showNotification(attack) {
-    // Create notification element
+function showNotification(data, type = 'info') {
     const notification = document.createElement('div');
-    notification.className = `notification notification-${attack.severity}`;
-    notification.innerHTML = `
-        <i class="fas fa-exclamation-triangle"></i>
-        <span><strong>${attack.honeypot_type.toUpperCase()}</strong>: ${attack.action} from ${attack.source_ip}</span>
-    `;
-
-    // Add styles
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 12px 20px;
-        background: rgba(30, 30, 47, 0.95);
-        border: 1px solid ${getSeverityColor(attack.severity)};
-        border-radius: 8px;
-        color: white;
-        font-size: 13px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        z-index: 9999;
-        animation: slideIn 0.3s ease;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    `;
-
-    document.body.appendChild(notification);
-
-    // Remove after 4 seconds
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
-    }, 4000);
-}
-
-function getSeverityColor(severity) {
     const colors = {
-        'critical': '#ff4444',
-        'high': '#ff8800',
-        'medium': '#ffcc00',
-        'low': '#44bb44'
+        critical: 'border-red-500 bg-red-500/10',
+        alert: 'border-yellow-500 bg-yellow-500/10',
+        info: 'border-blue-500 bg-blue-500/10'
     };
-    return colors[severity] || '#ffffff';
+
+    notification.className = `fixed top-4 right-4 z-[9999] p-4 rounded-lg border ${colors[type] || colors.info} backdrop-blur-sm max-w-sm animate-slide-in`;
+    notification.innerHTML = `
+        <div class="flex items-start gap-3">
+            <i class="fas fa-${type === 'critical' ? 'exclamation-triangle text-red-400' : 'bell text-yellow-400'} mt-0.5"></i>
+            <div>
+                <p class="text-sm font-semibold text-white">${data.reason || data.classification || 'Alert'}</p>
+                <p class="text-xs text-gray-400 mt-1">${data.attack?.source_ip || data.source_ip || ''} → ${(data.attack?.honeypot_type || data.honeypot_type || '').toUpperCase()}</p>
+                ${data.summary ? `<p class="text-xs text-gray-500 mt-1">${data.summary.substring(0, 100)}</p>` : ''}
+            </div>
+        </div>
+    `;
+    document.body.appendChild(notification);
+    setTimeout(() => { notification.style.opacity = '0'; setTimeout(() => notification.remove(), 300); }, 5000);
 }
 
-/**
- * Utility: Format timestamp for display
- */
 function formatTime(isoString) {
-    const date = new Date(isoString);
-    return date.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
+    if (!isoString) return '-';
+    return new Date(isoString).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
 function formatDateTime(isoString) {
-    const date = new Date(isoString);
-    return date.toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
+    if (!isoString) return '-';
+    return new Date(isoString).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
-/**
- * Utility: Create severity badge HTML
- */
 function severityBadge(severity) {
-    return `<span class="severity-badge severity-${severity}">${severity}</span>`;
+    const colors = { critical: 'bg-red-500/20 text-red-400', high: 'bg-orange-500/20 text-orange-400', medium: 'bg-yellow-500/20 text-yellow-400', low: 'bg-green-500/20 text-green-400' };
+    return `<span class="px-2 py-0.5 rounded text-[10px] ${colors[severity] || ''}">${severity}</span>`;
 }
 
-// Add CSS animation keyframes
+// Add animation styles
 const style = document.createElement('style');
 style.textContent = `
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
+    @keyframes slide-in { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .animate-slide-in { animation: slide-in 0.3s ease; }
+    @keyframes pulse-once { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 1; } }
+    .animate-pulse-once { animation: pulse-once 0.5s ease; }
 `;
 document.head.appendChild(style);

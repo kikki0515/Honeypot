@@ -1,124 +1,125 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - Honeypot-as-a-Service{% endblock %}
+{% block title %}Dashboard - AI Threat Intelligence Platform{% endblock %}
 
 {% block body %}
-<div class="app-layout">
+<div class="flex min-h-screen">
     <!-- Sidebar -->
-    <nav class="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-shield-alt"></i>
-            <span>HaaS Platform</span>
+    <nav class="w-64 bg-cyber-card border-r border-cyber-border fixed h-full z-50 flex flex-col">
+        <div class="p-5 border-b border-cyber-border flex items-center gap-3">
+            <i class="fas fa-shield-halved text-cyber-blue text-xl"></i>
+            <span class="font-bold text-lg">HaaS <span class="text-cyber-blue">AI</span></span>
         </div>
-        <ul class="sidebar-nav">
-            <li class="active">
-                <a href="{{ url_for('dashboard.index') }}">
-                    <i class="fas fa-tachometer-alt"></i> Dashboard
-                </a>
-            </li>
-            <li>
-                <a href="{{ url_for('dashboard.attacks') }}">
-                    <i class="fas fa-crosshairs"></i> Attack Logs
-                </a>
-            </li>
-            <li>
-                <a href="{{ url_for('dashboard.services') }}">
-                    <i class="fas fa-server"></i> Services
-                </a>
-            </li>
-            <li>
-                <a href="{{ url_for('dashboard.analytics') }}">
-                    <i class="fas fa-chart-bar"></i> Analytics
-                </a>
-            </li>
+        <ul class="flex-1 p-3 space-y-1">
+            <li><a href="{{ url_for('dashboard.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-cyber-blue/10 text-cyber-blue border border-cyber-blue/20">
+                <i class="fas fa-tachometer-alt w-5"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('dashboard.attacks') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <i class="fas fa-crosshairs w-5"></i> Attack Logs</a></li>
+            <li><a href="{{ url_for('dashboard.services') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <i class="fas fa-server w-5"></i> Services</a></li>
+            <li><a href="{{ url_for('dashboard.analytics') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <i class="fas fa-chart-bar w-5"></i> Analytics</a></li>
         </ul>
-        <div class="sidebar-footer">
-            <a href="{{ url_for('auth.logout') }}">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
+        <div class="p-3 border-t border-cyber-border">
+            <a href="{{ url_for('auth.logout') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition">
+                <i class="fas fa-sign-out-alt w-5"></i> Logout</a>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="main-content">
-        <header class="top-bar">
-            <h2><i class="fas fa-tachometer-alt"></i> Dashboard Overview</h2>
-            <div class="user-info">
-                <span><i class="fas fa-user-circle"></i> {{ current_user.username }}</span>
-                <span class="live-indicator"><i class="fas fa-circle"></i> Live</span>
+    <main class="flex-1 ml-64 p-6">
+        <!-- Top Bar -->
+        <header class="flex justify-between items-center mb-6 pb-4 border-b border-cyber-border">
+            <div>
+                <h1 class="text-2xl font-bold flex items-center gap-3">
+                    <i class="fas fa-brain text-cyber-purple"></i> AI Threat Intelligence Dashboard
+                </h1>
+                <p class="text-gray-500 text-sm mt-1">Real-time attack monitoring powered by AI</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-400"><i class="fas fa-user-circle"></i> {{ current_user.username }}</span>
+                <span class="flex items-center gap-2 text-cyber-green text-xs">
+                    <span class="w-2 h-2 rounded-full bg-cyber-green animate-pulse"></span> Live
+                </span>
             </div>
         </header>
 
         <!-- Stats Cards -->
-        <div class="stats-grid">
-            <div class="stat-card stat-attacks">
-                <div class="stat-icon"><i class="fas fa-crosshairs"></i></div>
-                <div class="stat-info">
-                    <h3 id="total-attacks">0</h3>
-                    <p>Total Attacks</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-4 hover:border-cyber-red/30 transition">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center"><i class="fas fa-crosshairs text-red-400"></i></div>
+                    <div><p class="text-2xl font-bold" id="total-attacks">0</p><p class="text-xs text-gray-500">Total Attacks</p></div>
                 </div>
             </div>
-            <div class="stat-card stat-24h">
-                <div class="stat-icon"><i class="fas fa-clock"></i></div>
-                <div class="stat-info">
-                    <h3 id="attacks-24h">0</h3>
-                    <p>Last 24 Hours</p>
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-4 hover:border-cyber-yellow/30 transition">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center"><i class="fas fa-clock text-yellow-400"></i></div>
+                    <div><p class="text-2xl font-bold" id="attacks-24h">0</p><p class="text-xs text-gray-500">Last 24 Hours</p></div>
                 </div>
             </div>
-            <div class="stat-card stat-ips">
-                <div class="stat-icon"><i class="fas fa-globe"></i></div>
-                <div class="stat-info">
-                    <h3 id="unique-ips">0</h3>
-                    <p>Unique IPs</p>
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-4 hover:border-cyber-blue/30 transition">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center"><i class="fas fa-globe text-blue-400"></i></div>
+                    <div><p class="text-2xl font-bold" id="unique-ips">0</p><p class="text-xs text-gray-500">Unique IPs</p></div>
                 </div>
             </div>
-            <div class="stat-card stat-services">
-                <div class="stat-icon"><i class="fas fa-server"></i></div>
-                <div class="stat-info">
-                    <h3 id="active-services">0</h3>
-                    <p>Active Services</p>
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-4 hover:border-cyber-purple/30 transition">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center"><i class="fas fa-brain text-purple-400"></i></div>
+                    <div><p class="text-2xl font-bold" id="anomaly-count">0</p><p class="text-xs text-gray-500">Anomalies</p></div>
                 </div>
+            </div>
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-4 hover:border-cyber-green/30 transition">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center"><i class="fas fa-project-diagram text-green-400"></i></div>
+                    <div><p class="text-2xl font-bold" id="campaign-count">0</p><p class="text-xs text-gray-500">Campaigns</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Alerts Feed -->
+        <div class="bg-cyber-card border border-cyber-border rounded-xl p-4 mb-6">
+            <h3 class="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
+                <i class="fas fa-robot text-cyber-purple"></i> Live AI Threat Feed
+            </h3>
+            <div id="ai-feed" class="space-y-2 max-h-48 overflow-y-auto font-mono text-xs">
+                <div class="text-gray-600 p-2">Waiting for attacks...</div>
             </div>
         </div>
 
         <!-- Charts Row -->
-        <div class="charts-grid">
-            <div class="chart-card">
-                <h3><i class="fas fa-chart-line"></i> Attack Trend (24h)</h3>
-                <canvas id="trendChart"></canvas>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+            <div class="lg:col-span-2 bg-cyber-card border border-cyber-border rounded-xl p-4">
+                <h3 class="text-sm text-gray-400 mb-3"><i class="fas fa-chart-line"></i> Attack Trend (24h)</h3>
+                <div class="h-56"><canvas id="trendChart"></canvas></div>
             </div>
-            <div class="chart-card">
-                <h3><i class="fas fa-chart-doughnut"></i> Attacks by Type</h3>
-                <canvas id="typeChart"></canvas>
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-4">
+                <h3 class="text-sm text-gray-400 mb-3"><i class="fas fa-pie-chart"></i> AI Classifications</h3>
+                <div class="h-56"><canvas id="classChart"></canvas></div>
             </div>
         </div>
 
-        <!-- Recent Attacks & Top IPs -->
-        <div class="data-grid">
-            <div class="data-card">
-                <h3><i class="fas fa-list"></i> Recent Attacks</h3>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                <th>Source IP</th>
-                                <th>Type</th>
-                                <th>Action</th>
-                                <th>Severity</th>
-                            </tr>
-                        </thead>
-                        <tbody id="recent-attacks">
-                            <tr><td colspan="5" class="empty-state">Loading...</td></tr>
-                        </tbody>
+        <!-- Data Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Recent Attacks -->
+            <div class="lg:col-span-2 bg-cyber-card border border-cyber-border rounded-xl p-4">
+                <h3 class="text-sm text-gray-400 mb-3"><i class="fas fa-list"></i> Recent Attacks</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs">
+                        <thead><tr class="text-gray-500 border-b border-cyber-border">
+                            <th class="text-left py-2 px-2">Time</th><th class="text-left py-2">IP</th>
+                            <th class="text-left py-2">Type</th><th class="text-left py-2">Classification</th>
+                            <th class="text-left py-2">Score</th><th class="text-left py-2">Severity</th>
+                        </tr></thead>
+                        <tbody id="recent-attacks"><tr><td colspan="6" class="text-center py-8 text-gray-600">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
-            <div class="data-card">
-                <h3><i class="fas fa-skull-crossbones"></i> Top Attacking IPs</h3>
-                <div class="top-ips-list" id="top-ips">
-                    <p class="empty-state">Loading...</p>
-                </div>
+            <!-- Top Threats -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-4">
+                <h3 class="text-sm text-gray-400 mb-3"><i class="fas fa-skull-crossbones"></i> Top Threat IPs</h3>
+                <div class="space-y-2" id="top-ips"><p class="text-gray-600 text-xs">Loading...</p></div>
             </div>
         </div>
     </main>
