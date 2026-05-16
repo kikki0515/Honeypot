@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Attack Logs - Honeypot-as-a-Service{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-shield-alt"></i>
+            <span>HaaS Platform</span>
+        </div>
+        <ul class="sidebar-nav">
+            <li>
+                <a href="{{ url_for('dashboard.index') }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="active">
+                <a href="{{ url_for('dashboard.attacks') }}">
+                    <i class="fas fa-crosshairs"></i> Attack Logs
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('dashboard.services') }}">
+                    <i class="fas fa-server"></i> Services
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('dashboard.analytics') }}">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('auth.logout') }}">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="top-bar">
+            <h2><i class="fas fa-crosshairs"></i> Attack Logs</h2>
+            <div class="filter-controls">
+                <select id="filter-type" class="form-select">
+                    <option value="">All Types</option>
+                    <option value="ssh">SSH</option>
+                    <option value="http">HTTP</option>
+                    <option value="ftp">FTP</option>
+                </select>
+                <select id="filter-severity" class="form-select">
+                    <option value="">All Severity</option>
+                    <option value="critical">Critical</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+                <button class="btn btn-sm" onclick="loadAttacks()">
+                    <i class="fas fa-refresh"></i> Refresh
+                </button>
+            </div>
+        </header>
+
+        <div class="data-card full-width">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Source IP</th>
+                            <th>Port</th>
+                            <th>Type</th>
+                            <th>Action</th>
+                            <th>Username</th>
+                            <th>Password</th>
+                            <th>Severity</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attacks-table">
+                        <tr><td colspan="8" class="empty-state">Loading attack logs...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/attacks.js') }}"></script>
+{% endblock %}

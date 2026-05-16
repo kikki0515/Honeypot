@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Honeypot-as-a-Service{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-shield-alt"></i>
+            <span>HaaS Platform</span>
+        </div>
+        <ul class="sidebar-nav">
+            <li class="active">
+                <a href="{{ url_for('dashboard.index') }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('dashboard.attacks') }}">
+                    <i class="fas fa-crosshairs"></i> Attack Logs
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('dashboard.services') }}">
+                    <i class="fas fa-server"></i> Services
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('dashboard.analytics') }}">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('auth.logout') }}">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="top-bar">
+            <h2><i class="fas fa-tachometer-alt"></i> Dashboard Overview</h2>
+            <div class="user-info">
+                <span><i class="fas fa-user-circle"></i> {{ current_user.username }}</span>
+                <span class="live-indicator"><i class="fas fa-circle"></i> Live</span>
+            </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card stat-attacks">
+                <div class="stat-icon"><i class="fas fa-crosshairs"></i></div>
+                <div class="stat-info">
+                    <h3 id="total-attacks">0</h3>
+                    <p>Total Attacks</p>
+                </div>
+            </div>
+            <div class="stat-card stat-24h">
+                <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                <div class="stat-info">
+                    <h3 id="attacks-24h">0</h3>
+                    <p>Last 24 Hours</p>
+                </div>
+            </div>
+            <div class="stat-card stat-ips">
+                <div class="stat-icon"><i class="fas fa-globe"></i></div>
+                <div class="stat-info">
+                    <h3 id="unique-ips">0</h3>
+                    <p>Unique IPs</p>
+                </div>
+            </div>
+            <div class="stat-card stat-services">
+                <div class="stat-icon"><i class="fas fa-server"></i></div>
+                <div class="stat-info">
+                    <h3 id="active-services">0</h3>
+                    <p>Active Services</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3><i class="fas fa-chart-line"></i> Attack Trend (24h)</h3>
+                <canvas id="trendChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3><i class="fas fa-chart-doughnut"></i> Attacks by Type</h3>
+                <canvas id="typeChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Attacks & Top IPs -->
+        <div class="data-grid">
+            <div class="data-card">
+                <h3><i class="fas fa-list"></i> Recent Attacks</h3>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Source IP</th>
+                                <th>Type</th>
+                                <th>Action</th>
+                                <th>Severity</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-attacks">
+                            <tr><td colspan="5" class="empty-state">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="data-card">
+                <h3><i class="fas fa-skull-crossbones"></i> Top Attacking IPs</h3>
+                <div class="top-ips-list" id="top-ips">
+                    <p class="empty-state">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

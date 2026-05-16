@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Honeypot-as-a-Service{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-shield-alt"></i>
+            <span>HaaS Platform</span>
+        </div>
+        <ul class="sidebar-nav">
+            <li>
+                <a href="{{ url_for('dashboard.index') }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('dashboard.attacks') }}">
+                    <i class="fas fa-crosshairs"></i> Attack Logs
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('dashboard.services') }}">
+                    <i class="fas fa-server"></i> Services
+                </a>
+            </li>
+            <li class="active">
+                <a href="{{ url_for('dashboard.analytics') }}">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('auth.logout') }}">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="top-bar">
+            <h2><i class="fas fa-chart-bar"></i> Analytics & Reports</h2>
+        </header>
+
+        <!-- Summary Stats -->
+        <div class="stats-grid">
+            <div class="stat-card stat-attacks">
+                <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="stat-info">
+                    <h3 id="critical-count">0</h3>
+                    <p>Critical Attacks</p>
+                </div>
+            </div>
+            <div class="stat-card stat-24h">
+                <div class="stat-icon"><i class="fas fa-bug"></i></div>
+                <div class="stat-info">
+                    <h3 id="high-count">0</h3>
+                    <p>High Severity</p>
+                </div>
+            </div>
+            <div class="stat-card stat-ips">
+                <div class="stat-icon"><i class="fas fa-user-secret"></i></div>
+                <div class="stat-info">
+                    <h3 id="unique-attackers">0</h3>
+                    <p>Unique Attackers</p>
+                </div>
+            </div>
+            <div class="stat-card stat-services">
+                <div class="stat-icon"><i class="fas fa-key"></i></div>
+                <div class="stat-info">
+                    <h3 id="login-attempts">0</h3>
+                    <p>Login Attempts</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3><i class="fas fa-chart-pie"></i> Severity Distribution</h3>
+                <canvas id="severityChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3><i class="fas fa-chart-bar"></i> Attacks by Protocol</h3>
+                <canvas id="protocolChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Top Attackers Table -->
+        <div class="data-card full-width">
+            <h3><i class="fas fa-user-secret"></i> Top Attackers</h3>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>IP Address</th>
+                            <th>Total Attacks</th>
+                            <th>Threat Level</th>
+                        </tr>
+                    </thead>
+                    <tbody id="top-attackers-table">
+                        <tr><td colspan="4" class="empty-state">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Services - Honeypot-as-a-Service{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-shield-alt"></i>
+            <span>HaaS Platform</span>
+        </div>
+        <ul class="sidebar-nav">
+            <li>
+                <a href="{{ url_for('dashboard.index') }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('dashboard.attacks') }}">
+                    <i class="fas fa-crosshairs"></i> Attack Logs
+                </a>
+            </li>
+            <li class="active">
+                <a href="{{ url_for('dashboard.services') }}">
+                    <i class="fas fa-server"></i> Services
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('dashboard.analytics') }}">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('auth.logout') }}">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="top-bar">
+            <h2><i class="fas fa-server"></i> Honeypot Services</h2>
+        </header>
+
+        <div class="services-grid" id="services-container">
+            <!-- SSH Honeypot -->
+            <div class="service-card" id="service-ssh">
+                <div class="service-header">
+                    <div class="service-icon ssh-icon">
+                        <i class="fas fa-terminal"></i>
+                    </div>
+                    <div class="service-status">
+                        <span class="status-badge status-stopped" id="status-ssh">Stopped</span>
+                    </div>
+                </div>
+                <div class="service-body">
+                    <h3>SSH Honeypot</h3>
+                    <p>Simulates an SSH server to capture brute-force login attempts and credential harvesting.</p>
+                    <div class="service-details">
+                        <span><i class="fas fa-plug"></i> Port: <strong>2222</strong></span>
+                        <span><i class="fas fa-link"></i> Connections: <strong id="conn-ssh">0</strong></span>
+                    </div>
+                </div>
+                <div class="service-actions">
+                    <button class="btn btn-success" onclick="toggleService('ssh')">
+                        <i class="fas fa-play"></i> Start
+                    </button>
+                </div>
+            </div>
+
+            <!-- HTTP Honeypot -->
+            <div class="service-card" id="service-http">
+                <div class="service-header">
+                    <div class="service-icon http-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="service-status">
+                        <span class="status-badge status-stopped" id="status-http">Stopped</span>
+                    </div>
+                </div>
+                <div class="service-body">
+                    <h3>HTTP Honeypot</h3>
+                    <p>Simulates a vulnerable web server to detect web scanning, SQL injection, and path traversal attacks.</p>
+                    <div class="service-details">
+                        <span><i class="fas fa-plug"></i> Port: <strong>8080</strong></span>
+                        <span><i class="fas fa-link"></i> Connections: <strong id="conn-http">0</strong></span>
+                    </div>
+                </div>
+                <div class="service-actions">
+                    <button class="btn btn-success" onclick="toggleService('http')">
+                        <i class="fas fa-play"></i> Start
+                    </button>
+                </div>
+            </div>
+
+            <!-- FTP Honeypot -->
+            <div class="service-card" id="service-ftp">
+                <div class="service-header">
+                    <div class="service-icon ftp-icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <div class="service-status">
+                        <span class="status-badge status-stopped" id="status-ftp">Stopped</span>
+                    </div>
+                </div>
+                <div class="service-body">
+                    <h3>FTP Honeypot</h3>
+                    <p>Simulates an FTP server to capture file access attempts, credential theft, and unauthorized uploads.</p>
+                    <div class="service-details">
+                        <span><i class="fas fa-plug"></i> Port: <strong>2121</strong></span>
+                        <span><i class="fas fa-link"></i> Connections: <strong id="conn-ftp">0</strong></span>
+                    </div>
+                </div>
+                <div class="service-actions">
+                    <button class="btn btn-success" onclick="toggleService('ftp')">
+                        <i class="fas fa-play"></i> Start
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/services.js') }}"></script>
+{% endblock %}
